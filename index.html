@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinterest Layout with Reset</title>
+  <style>
+    body{margin:0;font-family:Inter,sans-serif;}
+    header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fafafa;border-bottom:1px solid #ddd;}
+    header h1{margin:0;font-size:18px;}
+    header .btn{padding:8px 12px;border:1px solid #ddd;background:#fff;cursor:pointer;border-radius:8px;font:600 13px/1 Inter;}
+    #grid{column-count:4;column-gap:16px;padding:16px;}
+    #grid .item{break-inside:avoid;margin-bottom:16px;}
+    #grid img, #grid video{width:100%;border-radius:8px;display:block;}
+
+    @media(max-width:1024px){#grid{column-count:3;}}
+    @media(max-width:768px){#grid{column-count:2;}}
+    @media(max-width:480px){#grid{column-count:1;}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My Board</h1>
+    <button id="btnReset" class="btn" type="button">Reset</button>
+  </header>
+
+  <main>
+    <div id="grid"></div>
+  </main>
+
+  <script src="app_min.js"></script>
+</body>
+</html>
