@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minterest — Drive Pins</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0d10; --panel:#0f1318; --text:#e7ecf3; --muted:#9aa4b2; --border:#1b2431;
+      --brand:#7c5cff; --brand2:#26e4a7; --card:#0f141b; --card-hover:#121a23; --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius-lg:18px; --radius-md:12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; color:var(--text); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
+      background: radial-gradient(1100px 700px at 85% -10%, rgba(124,92,255,.14), transparent 60%),
+                  radial-gradient(800px 520px at 10% 10%, rgba(38,228,167,.10), transparent 55%), var(--bg)}
+
+    .shell{max-width:1200px; margin:0 auto; padding:0 18px}
+
+    /* Header */
+    header{position:sticky; top:0; z-index:40; backdrop-filter:saturate(1.2) blur(10px);
+      background:linear-gradient(180deg, rgba(11,13,16,.85), rgba(11,13,16,.65)); border-bottom:1px solid var(--border)}
+    .bar{display:flex; align-items:center; gap:14px; padding:14px 0}
+    .logo{display:flex; align-items:center; gap:10px; font-weight:800}
+    .logo-badge{display:grid; place-items:center; width:40px; height:40px; border-radius:12px;
+      background:linear-gradient(135deg, var(--brand), var(--brand2)); box-shadow:var(--shadow); color:#091017}
+    .brand{font-size:18px}
+
+    /* Grid (your JS will append .card items inside #grid) */
+    #grid{ column-count:1; column-gap:16px; padding:18px 0 60px }
+    @media (min-width:560px){ #grid{ column-count:2 } }
+    @media (min-width:860px){ #grid{ column-count:3 } }
+    @media (min-width:1140px){ #grid{ column-count:4 } }
+
+    /* Card defaults (used by app_min.js renderFileCard) */
+    .card{ break-inside:avoid; margin:0 0 16px; position:relative; border-radius:var(--radius-lg); overflow:hidden;
+      background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow); transition:transform .18s, box-shadow .18s, background .18s }
+    .card:hover{ transform:translateY(-2px); background:var(--card-hover); box-shadow:0 14px 40px rgba(0,0,0,.45) }
+    .card img{ width:100%; display:block }
+    .card .meta{ position:absolute; left:10px; right:10px; bottom:10px; display:flex; justify-content:space-between; align-items:center;
+      backdrop-filter:blur(10px); background:rgba(5,8,12,.55); border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:7px 10px; font-size:12px; color:#eaf2ff }
+
+    /* Floating action button (id=fab) */
+    .fab{position:fixed; right:22px; bottom:22px; width:64px; height:64px; border:0; border-radius:50%; font:800 28px/1 Inter; color:#081018; cursor:pointer;
+      box-shadow:0 12px 40px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.06);
+      background:linear-gradient(135deg, var(--brand), var(--brand2)); transition:transform .15s ease, box-shadow .15s ease}
+    .fab:hover{ transform:translateY(-2px); box-shadow:0 18px 50px rgba(0,0,0,.55) }
+
+    /* Modal (id=overlay) */
+    #overlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; padding:24px; z-index:60;
+      background:rgba(2,4,8,.72); backdrop-filter:blur(6px) }
+    .modal{ width:min(560px, 92vw); background:var(--panel); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow); overflow:hidden }
+    .modal header{ position:static; backdrop-filter:none; background:linear-gradient(180deg, rgba(14,18,23,1), rgba(14,18,23,.85)); border:0 }
+    .modal .head{ display:flex; align-items:center; justify-content:space-between; padding:16px 18px }
+    .modal .title{ font:700 18px/1.1 Inter }
+    .modal .body{ padding:16px 18px; display:flex; flex-direction:column; gap:12px }
+    .row{ display:flex; gap:10px; align-items:center }
+    .label{ width:110px; color:var(--muted); font-size:13px }
+    .input{ flex:1; display:flex; align-items:center; gap:10px; background:#0e141c; border:1px solid var(--border); border-radius:10px; padding:10px 12px }
+    .input input{ flex:1; background:transparent; border:0; outline:0; color:var(--text); font:500 14px/1 Inter }
+    .modal .foot{ display:flex; justify-content:flex-end; gap:10px; padding:16px 18px; border-top:1px solid var(--border) }
+    .btn{ border:1px solid var(--border); background:#0e141c; color:var(--text); padding:10px 14px; border-radius:10px; font:600 13px/1 Inter; cursor:pointer; transition:filter .15s ease }
+    .btn:hover{ filter:brightness(1.05) }
+    .btn.primary{ background:linear-gradient(135deg, rgba(124,92,255,.25), rgba(38,228,167,.24)); border-color:transparent }
+
+    /* Toast (id=toast) */
+    #toast{ position:fixed; left:50%; bottom:100px; transform:translateX(-50%); background:rgba(14,18,23,.92); color:#eaf2ff; border:1px solid rgba(255,255,255,.08);
+      padding:10px 14px; border-radius:999px; display:none; z-index:70; box-shadow:var(--shadow); font:700 13px/1 Inter }
+
+    footer{ text-align:center; color:var(--muted); padding:30px 16px; border-top:1px solid var(--border) }
+    .tiny{ font-size:12px }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <div class="bar">
+        <div class="logo" aria-label="Minterest">
+          <div class="logo-badge">Mi</div>
+          <div class="brand">Minterest</div>
+        </div>
+        <div style="flex:1"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <!-- app_min.js এখানে কার্ড ইনজেক্ট করবে -->
+    <section id="grid" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    <div class="tiny">© <span id="yr"></span> Minterest • Crafted with ❤</div>
+  </footer>
+
+  <!-- Floating + button (exact id=fab as required by app_min.js) -->
+  <button id="fab" aria-label="Add" class="fab">+</button>
+
+  <!-- Modal overlay (exact ids used by app_min.js: overlay, link, password, btnAdd, btnCancel) -->
+  <div id="overlay" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <header>
+        <div class="head">
+          <div class="title">Google Drive থেকে আইটেম যোগ করুন</div>
+        </div>
+      </header>
+      <div class="body">
+        <div class="row">
+          <div class="label">Drive Folder Link</div>
+          <div class="input"><input id="link" type="url" placeholder="https://drive.google.com/drive/folders/…"></div>
+        </div>
+        <div class="row">
+          <div class="label">Password</div>
+          <div class="input"><input id="password" type="password" placeholder="Enter password"></div>
+        </div>
+      </div>
+      <div class="foot">
+        <button class="btn" id="btnCancel" type="button">Cancel</button>
+        <button class="btn primary" id="btnAdd" type="button">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast for messages (exact id=toast) -->
+  <div id="toast"></div>
+
+  <!-- আপনার বিদ্যমান JS — সব ফাংশনালিটি এখানেই থাকবে -->
+  <script src="app_min.js"></script>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
