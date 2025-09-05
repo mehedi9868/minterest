@@ -173,3 +173,35 @@ window.addEventListener('DOMContentLoaded', () => {
 
   loadBoard();
 });
+
+
+/* >>> Masonry Equal-Height Cleanup (additive) <<< */
+(function(){
+  function pinterestMasonryFix(){
+    var gridEl = document.querySelector('#grid, .grid, .masonry, .pin-grid');
+    if(!gridEl) return;
+    var nodes = gridEl.querySelectorAll('.card,.pin,.item,.grid-item');
+    nodes.forEach(function(el){
+      ['height','minHeight','maxHeight','aspectRatio'].forEach(function(p){ 
+        try{ el.style.removeProperty(p.replace(/[A-Z]/g, function(m){return '-' + m.toLowerCase();})); }catch(e){}
+      });
+      try{ el.style.removeProperty('--h'); }catch(e){}
+      var media = el.querySelector('img,video');
+      if(media){
+        ['height','minHeight','maxHeight','aspectRatio'].forEach(function(p){ 
+          try{ media.style.removeProperty(p.replace(/[A-Z]/g, function(m){return '-' + m.toLowerCase();})); }catch(e){}
+        });
+        media.removeAttribute('height');
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', pinterestMasonryFix);
+  window.addEventListener('load', pinterestMasonryFix);
+  var gridWatch = function(){
+    var gridEl = document.querySelector('#grid, .grid, .masonry, .pin-grid');
+    if(!gridEl) return;
+    var mo = new MutationObserver(function(){ pinterestMasonryFix(); });
+    mo.observe(gridEl, {childList:true});
+  };
+  document.addEventListener('DOMContentLoaded', gridWatch);
+})();

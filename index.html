@@ -108,6 +108,46 @@
 }
 
 </style>
+<style>
+/* >>> Mobile Masonry Variable-Height Fix <<< */
+@media (max-width: 768px){
+  .grid, #grid, .masonry, .pin-grid {
+    column-count: 2 !important;
+    column-gap: 12px !important;
+  }
+  .grid .card, .grid .pin, .grid .item, .grid .grid-item,
+  #grid .card, #grid .pin, #grid .item, #grid .grid-item,
+  .masonry .card, .masonry .pin, .masonry .item, .masonry .grid-item,
+  .pin-grid .card, .pin-grid .pin, .pin-grid .item, .pin-grid .grid-item {
+    break-inside: avoid !important;
+    margin: 0 0 12px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+  .grid img, .grid video,
+  #grid img, #grid video,
+  .masonry img, .masonry video,
+  .pin-grid img, .pin-grid video {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+    object-fit: cover;
+    display: block !important;
+    border-radius: 12px;
+  }
+  .grid .full, .grid .full-screen, .grid .vh100, .grid .h-screen,
+  #grid .full, #grid .full-screen, #grid .vh100, #grid .h-screen {
+    height: auto !important;
+  }
+  .grid > [style*="height:"], #grid > [style*="height:"],
+  .masonry > [style*="height:"], .pin-grid > [style*="height:"] {
+    height: auto !important;
+  }
+}
+
+</style>
 </head>
 <body>
   <header>
