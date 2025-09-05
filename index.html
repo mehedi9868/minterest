@@ -74,6 +74,40 @@
     footer{ text-align:center; color:var(--muted); padding:30px 16px; border-top:1px solid var(--border) }
     .tiny{ font-size:12px }
   </style>
+<style>
+/* >>> Mobile Masonry Overrides (additive, no other changes) <<< */
+@media (max-width: 768px){
+  /* The grid container that holds all cards/pins */
+  .grid, #grid, .masonry, .pin-grid {
+    column-count: 2 !important;
+    column-gap: 12px !important;
+  }
+  /* Each card should avoid breaking between columns */
+  .card, .pin, .item, .grid-item {
+    break-inside: avoid !important;
+    margin: 0 0 12px !important;
+    width: 100% !important;
+  }
+  /* Media elements should flow naturally, not fullscreen */
+  .card img, .card video,
+  .pin img, .pin video,
+  .item img, .item video,
+  .grid-item img, .grid-item video,
+  img.pin, video.pin {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  /* Remove any layout forcing full viewport height on mobile */
+  .full, .full-screen, .vh100, .h-screen {
+    height: auto !important;
+  }
+}
+
+</style>
 </head>
 <body>
   <header>
