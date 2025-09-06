@@ -141,15 +141,19 @@ function renderFileCard(file){
   // VIDEO badge
   if(isVideo){
     const label = document.createElement('div');
-    label.textContent = 'VIDEO';
+    label.textContent = 'ভিডিও';
     label.style.position = 'absolute';
     label.style.bottom = '8px';
     label.style.right = '8px';
-    label.style.background = 'rgba(0,0,0,0.6)';
+    label.style.background = 'rgba(0,0,0,0.55)';
     label.style.color = 'white';
     label.style.fontSize = '12px';
     label.style.padding = '2px 6px';
-    label.style.borderRadius = '6px';
+    label.style.borderRadius = '999px';
+    label.style.backdropFilter = 'blur(4px)';
+    label.style.fontWeight = '700';
+    label.style.letterSpacing = '0.2px';
+    label.style.boxShadow = '0 2px 10px rgba(0,0,0,0.35)';
     label.style.pointerEvents = 'none';
     card.appendChild(label);
   }

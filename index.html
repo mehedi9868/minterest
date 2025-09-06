@@ -157,6 +157,20 @@ img.sq1 {
 }
 
 </style>
+<style>
+
+/* Force the very first image (marked .sq1) to be square on all screens */
+#grid .card:first-child img.sq1 {
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  display: block !important;
+  border-radius: 12px !important;
+}
+
+</style>
 </head>
 <body>
   <header>
