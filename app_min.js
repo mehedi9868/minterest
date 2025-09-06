@@ -9,6 +9,8 @@ const DEFAULT_DRIVE_URL = "https://drive.google.com/drive/folders/12qLQqg_gjw7gG
 
 const seen = new Set();
 let grid, toast, overlay, linkInput, pwdInput;
+// NEW: Track first real image for square
+let firstImageSquared = false;
 
 function showToast(msg, ms = 2600){
   if(!toast) return;
@@ -89,18 +91,6 @@ async function listFolderFiles(folderId){
   return added;
 }
 
-
-// === Custom Modifications ===
-let firstImageDone = false;
-
-
-// === Custom Modifications (Fixed Video Preview) ===
-let firstImageDone = false;
-
-
-// === Custom Modifications (Keep Original Structure) ===
-let firstImageDone = false;
-
 function renderFileCard(file){
   if(!grid) return;
   const isVideo = (file.mimeType || '').startsWith('video/');
@@ -114,9 +104,20 @@ function renderFileCard(file){
   img.src = thumb;
   img.alt = file.name || (isVideo?'video':'image');
   img.loading = 'lazy';
+
+  // Ensure ONLY the first *image* (not video) is square after it loads
+  if(!isVideo && !firstImageSquared){
+    img.addEventListener('load', () => {
+      img.style.aspectRatio = '1 / 1';
+      img.style.objectFit = 'cover';
+      firstImageSquared = true;
+    }, { once: true });
+  }
+
   link.appendChild(img);
   card.appendChild(link);
-  // Add 'VIDEO' badge for videos (bottom-right)
+
+  // VIDEO badge at bottom-right for videos
   if(isVideo){
     const label = document.createElement('div');
     label.textContent = 'VIDEO';
@@ -128,56 +129,9 @@ function renderFileCard(file){
     label.style.fontSize = '12px';
     label.style.padding = '2px 6px';
     label.style.borderRadius = '6px';
+    label.style.pointerEvents = 'none';
     card.appendChild(label);
   }
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  meta.innerHTML = `<span title="${file.name||''}">${truncate(file.name||'', 28)}</span><span>${file.mimeType.split('/')[0]}</span>`;
-  card.appendChild(meta);
-  grid.appendChild(card);
-}
-
-  link.appendChild(img);
-  card.appendChild(link);
-
-  // Add "VIDEO" label for videos
-  if(isVideo){
-    const label = document.createElement('div');
-    label.textContent = 'VIDEO';
-    label.style.position = 'absolute';
-    label.style.bottom = '8px';
-    label.style.right = '8px';
-    label.style.background = 'rgba(0,0,0,0.6)';
-    label.style.color = 'white';
-    label.style.fontSize = '12px';
-    label.style.padding = '2px 6px';
-    label.style.borderRadius = '6px';
-    card.appendChild(label);
-  }
-
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  meta.innerHTML = `<span title="${file.name||''}">${truncate(file.name||'', 28)}</span><span>${file.mimeType.split('/')[0]}</span>`;
-  card.appendChild(meta);
-  grid.appendChild(card);
-}
-
-    link.appendChild(img);
-  }
-
-  card.appendChild(link);
-
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  meta.innerHTML = `<span title="${file.name||''}">${truncate(file.name||'', 28)}</span><span>${file.mimeType.split('/')[0]}</span>`;
-  card.appendChild(meta);
-  grid.appendChild(card);
-}
-
-    link.appendChild(img);
-  }
-
-  card.appendChild(link);
 
   const meta = document.createElement('div');
   meta.className = 'meta';
