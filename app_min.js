@@ -97,25 +97,27 @@ let firstImageDone = false;
 // === Custom Modifications (Fixed Video Preview) ===
 let firstImageDone = false;
 
+
+// === Custom Modifications (Keep Original Structure) ===
+let firstImageDone = false;
+
 function renderFileCard(file){
   if(!grid) return;
   const isVideo = (file.mimeType || '').startsWith('video/');
   const card = document.createElement('article');
   card.className = 'card';
-
   const link = document.createElement('a');
   link.href = file.webViewLink || '#';
   link.target = '_blank'; link.rel='noopener';
-
+  const img = document.createElement('img');
+  const thumb = file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=s2048') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
+  img.src = thumb;
+  img.alt = file.name || (isVideo?'video':'image');
+  img.loading = 'lazy';
+  link.appendChild(img);
+  card.appendChild(link);
+  // Add 'VIDEO' badge for videos (bottom-right)
   if(isVideo){
-    const img = document.createElement('img');
-    const thumb = file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=s2048') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
-    img.src = thumb;
-    img.alt = file.name || 'video';
-    img.loading = 'lazy';
-    link.appendChild(img);
-
-    // Add "VIDEO" label at bottom-right
     const label = document.createElement('div');
     label.textContent = 'VIDEO';
     label.style.position = 'absolute';
@@ -127,18 +129,38 @@ function renderFileCard(file){
     label.style.padding = '2px 6px';
     label.style.borderRadius = '6px';
     card.appendChild(label);
-  } else {
-    const img = document.createElement('img');
-    const thumb = file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=s2048') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
-    img.src = thumb;
-    img.alt = file.name || 'image';
-    img.loading = 'lazy';
+  }
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.innerHTML = `<span title="${file.name||''}">${truncate(file.name||'', 28)}</span><span>${file.mimeType.split('/')[0]}</span>`;
+  card.appendChild(meta);
+  grid.appendChild(card);
+}
 
-    if(!firstImageDone){
-      img.style.aspectRatio = "1 / 1";
-      img.style.objectFit = "cover";
-      firstImageDone = true;
-    }
+  link.appendChild(img);
+  card.appendChild(link);
+
+  // Add "VIDEO" label for videos
+  if(isVideo){
+    const label = document.createElement('div');
+    label.textContent = 'VIDEO';
+    label.style.position = 'absolute';
+    label.style.bottom = '8px';
+    label.style.right = '8px';
+    label.style.background = 'rgba(0,0,0,0.6)';
+    label.style.color = 'white';
+    label.style.fontSize = '12px';
+    label.style.padding = '2px 6px';
+    label.style.borderRadius = '6px';
+    card.appendChild(label);
+  }
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.innerHTML = `<span title="${file.name||''}">${truncate(file.name||'', 28)}</span><span>${file.mimeType.split('/')[0]}</span>`;
+  card.appendChild(meta);
+  grid.appendChild(card);
+}
 
     link.appendChild(img);
   }
