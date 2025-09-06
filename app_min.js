@@ -3,7 +3,7 @@
 // ===== Config (set these) =====
 const API_KEY = "AIzaSyDUE_P391KSJ4gC6-FG8ch-XeinTh4gUT8";         // <-- আপনার Drive API key
 const REQUIRED_PASSWORD = "iloveyou";                             // <-- পাসওয়ার্ড
-const ANOTHER_PASSWORD = 50607080;
+const ANOTHER_PASSWORD = "50607080";
 // ডিফল্ট ড্রাইভ ফোল্ডার (যদি ইউজার লিংক না দেয় বা ভুল দেয়, এটা ব্যবহার হবে)
 const DEFAULT_DRIVE_URL = "https://drive.google.com/drive/folders/12qLQqg_gjw7gGcmbJ4dIGeNe6iRigahy"; // <-- এখানে আপনার ডিফল্ট ফোল্ডার লিংক বসান
 // =================================
