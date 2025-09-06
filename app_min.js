@@ -93,6 +93,10 @@ async function listFolderFiles(folderId){
 // === Custom Modifications ===
 let firstImageDone = false;
 
+
+// === Custom Modifications (Fixed Video Preview) ===
+let firstImageDone = false;
+
 function renderFileCard(file){
   if(!grid) return;
   const isVideo = (file.mimeType || '').startsWith('video/');
@@ -104,14 +108,14 @@ function renderFileCard(file){
   link.target = '_blank'; link.rel='noopener';
 
   if(isVideo){
-    const videoEl = document.createElement('video');
-    videoEl.src = `https://drive.google.com/uc?id=${file.id}&export=download`;
-    videoEl.controls = true;
-    videoEl.style.width = '100%';
-    videoEl.style.display = 'block';
-    link.appendChild(videoEl);
+    const img = document.createElement('img');
+    const thumb = file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=s2048') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
+    img.src = thumb;
+    img.alt = file.name || 'video';
+    img.loading = 'lazy';
+    link.appendChild(img);
 
-    // Add "video" label at bottom-right
+    // Add "VIDEO" label at bottom-right
     const label = document.createElement('div');
     label.textContent = 'VIDEO';
     label.style.position = 'absolute';
@@ -135,6 +139,18 @@ function renderFileCard(file){
       img.style.objectFit = "cover";
       firstImageDone = true;
     }
+
+    link.appendChild(img);
+  }
+
+  card.appendChild(link);
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.innerHTML = `<span title="${file.name||''}">${truncate(file.name||'', 28)}</span><span>${file.mimeType.split('/')[0]}</span>`;
+  card.appendChild(meta);
+  grid.appendChild(card);
+}
 
     link.appendChild(img);
   }
