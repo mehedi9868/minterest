@@ -68,6 +68,7 @@ function shuffle(arr){
   return arr;
 }
 
+
 async function listFolderFiles(folderId){
   const base = 'https://www.googleapis.com/drive/v3/files';
   const q = encodeURIComponent(`'${folderId}' in parents and (mimeType contains 'image/' or mimeType contains 'video/') and trashed = false`);
@@ -82,6 +83,36 @@ async function listFolderFiles(folderId){
       const err = await res.text();
       throw new Error(err || ('HTTP '+res.status));
     }
+    const data = await res.json();
+    const files = (data.files || []);
+    for(const f of files){
+      if(seen.has(f.id)) continue;
+      all.push(f);
+    }
+    pageToken = data.nextPageToken || '';
+  } while(pageToken);
+
+  // Ensure first is image if available
+  let ordered = [];
+  const imgs = all.filter(f => (f.mimeType||'').startsWith('image/'));
+  if(imgs.length){
+    ordered.push(imgs[0]);
+    const rest = all.filter(f => f.id !== imgs[0].id);
+    ordered = ordered.concat(rest);
+  } else {
+    ordered = all;
+  }
+
+  for(const f of ordered){
+    renderFileCard(f);
+    seen.add(f.id);
+    added++;
+  }
+
+  if(added>0) saveBoard();
+  return added;
+}
+
     const data = await res.json();
     const files = (data.files || []);
     for(const f of files){
@@ -114,6 +145,7 @@ async function listFolderFiles(folderId){
   return added;
 }
 
+
 function renderFileCard(file){
   if(!grid) return;
   const isVideo = (file.mimeType || '').startsWith('video/');
@@ -126,14 +158,39 @@ function renderFileCard(file){
   const img = document.createElement('img');
   const thumb = file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=s2048') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
   img.src = thumb;
-  img.alt = file.name || (isVideo?'video':'image');
+  img.alt = isVideo ? 'ভিডিও' : 'image';
   img.loading = 'lazy';
 
-  // Mark the very first IMAGE as square via CSS class (so later cleanup doesn't strip inline styles)
   if(!isVideo && !firstImageSquared){
     img.classList.add('sq1');
     firstImageSquared = true;
   }
+
+  link.appendChild(img);
+  card.appendChild(link);
+
+  if(isVideo){
+    const label = document.createElement('div');
+    label.textContent = 'ভিডিও';
+    label.style.position = 'absolute';
+    label.style.top = '8px';
+    label.style.right = '8px';
+    label.style.background = 'rgba(0,0,0,0.55)';
+    label.style.color = 'white';
+    label.style.fontSize = '13px';
+    label.style.padding = '2px 8px';
+    label.style.borderRadius = '999px';
+    label.style.backdropFilter = 'blur(4px)';
+    label.style.fontWeight = '700';
+    label.style.letterSpacing = '0.3px';
+    label.style.boxShadow = '0 2px 8px rgba(0,0,0,0.35)';
+    label.style.pointerEvents = 'none';
+    card.appendChild(label);
+  }
+
+  grid.appendChild(card);
+}
+
 
   link.appendChild(img);
   card.appendChild(link);
@@ -158,11 +215,7 @@ function renderFileCard(file){
     card.appendChild(label);
   }
 
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  meta.innerHTML = `<span title="${file.name||''}">${truncate(file.name||'', 28)}</span><span>${file.mimeType.split('/')[0]}</span>`;
-  card.appendChild(meta);
-  grid.appendChild(card);
+    grid.appendChild(card);
 }
 function truncate(s, n){ return s.length>n? s.slice(0, n-1)+'…' : s; }
 
