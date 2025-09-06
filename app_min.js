@@ -9,7 +9,6 @@ const DEFAULT_DRIVE_URL = "https://drive.google.com/drive/folders/12qLQqg_gjw7gG
 
 const seen = new Set();
 let grid, toast, overlay, linkInput, pwdInput;
-let firstImageSquared = false; // track first image
 
 function showToast(msg, ms = 2600){
   if(!toast) return;
@@ -26,10 +25,14 @@ function saveBoard(){
   localStorage.setItem('drivepins_seen', JSON.stringify(ids));
 }
 
+
 function resetBoard(){
   if(!grid) return;
+  // Clear UI
   grid.innerHTML = '';
+  // Clear seen set
   try{ if(seen && typeof seen.clear === 'function') seen.clear(); }catch(e){}
+  // Clear saved state
   try{
     localStorage.removeItem('drivepins_grid');
     localStorage.removeItem('drivepins_seen');
@@ -45,6 +48,7 @@ function loadBoard(){
   if(ids){ JSON.parse(ids).forEach(id=>seen.add(id)); }
 }
 
+// Drive folder id extractor
 function getFolderIdFromUrl(url){
   if(!url) return null;
   try{
@@ -59,14 +63,6 @@ function getFolderIdFromUrl(url){
   }catch(e){ return null; }
 }
 
-// Fisher–Yates
-function shuffle(arr){
-  for(let i = arr.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
 
 
 async function listFolderFiles(folderId){
@@ -83,6 +79,35 @@ async function listFolderFiles(folderId){
       const err = await res.text();
       throw new Error(err || ('HTTP '+res.status));
     }
+    const data = await res.json();
+    const files = (data.files || []);
+    for(const f of files){
+      if(seen.has(f.id)) continue;
+      all.push(f);
+    }
+    pageToken = data.nextPageToken || '';
+  } while(pageToken);
+
+  // Ensure first item is an image (if any image exists), preserve original order otherwise
+  let ordered = [];
+  const firstImageIndex = all.findIndex(f => (f.mimeType || '').startsWith('image/'));
+  if(firstImageIndex > 0){
+    ordered.push(all[firstImageIndex]);
+    ordered = ordered.concat(all.filter((_, idx) => idx !== firstImageIndex));
+  }else{
+    ordered = all.slice();
+  }
+
+  for(const f of ordered){
+    renderFileCard(f);
+    seen.add(f.id);
+    added++;
+  }
+
+  if(added>0) saveBoard();
+  return added;
+}
+
     const data = await res.json();
     const files = (data.files || []);
     for(const f of files){
@@ -117,33 +142,16 @@ async function listFolderFiles(folderId){
     const files = (data.files || []);
     for(const f of files){
       if(seen.has(f.id)) continue;
-      all.push(f);
+      renderFileCard(f);
+      seen.add(f.id);
+      added++;
     }
     pageToken = data.nextPageToken || '';
   } while(pageToken);
-
-  // Make a shuffled list but ensure first item is an image if any image exists
-  const imgs = all.filter(f => (f.mimeType||'').startsWith('image/'));
-  const vids = all.filter(f => (f.mimeType||'').startsWith('video/'));
-  shuffle(imgs); shuffle(vids);
-
-  let ordered = [];
-  if(imgs.length){
-    ordered.push(imgs.shift()); // first must be image
-    ordered = ordered.concat(shuffle(imgs.concat(vids)));
-  }else{
-    ordered = shuffle(vids);
-  }
-
-  for(const f of ordered){
-    renderFileCard(f);
-    seen.add(f.id);
-    added++;
-  }
-
   if(added>0) saveBoard();
   return added;
 }
+
 
 
 function renderFileCard(file){
@@ -151,6 +159,7 @@ function renderFileCard(file){
   const isVideo = (file.mimeType || '').startsWith('video/');
   const card = document.createElement('article');
   card.className = 'card';
+
   const link = document.createElement('a');
   link.href = file.webViewLink || '#';
   link.target = '_blank'; link.rel='noopener';
@@ -161,7 +170,8 @@ function renderFileCard(file){
   img.alt = isVideo ? 'ভিডিও' : 'image';
   img.loading = 'lazy';
 
-  if(!isVideo && !firstImageSquared){
+  // First actual image becomes square
+  if(!isVideo && typeof firstImageSquared !== 'undefined' && !firstImageSquared){
     img.classList.add('sq1');
     firstImageSquared = true;
   }
@@ -173,12 +183,40 @@ function renderFileCard(file){
     const label = document.createElement('div');
     label.textContent = 'ভিডিও';
     label.style.position = 'absolute';
-    label.style.top = '8px';
-    label.style.right = '8px';
+    label.style.right = '10px';
+    label.style.bottom = '10px';
     label.style.background = 'rgba(0,0,0,0.55)';
     label.style.color = 'white';
-    label.style.fontSize = '13px';
-    label.style.padding = '2px 8px';
+    label.style.fontSize = '14px';   // slightly larger
+    label.style.padding = '3px 10px';
+    label.style.borderRadius = '999px';
+    label.style.backdropFilter = 'blur(4px)';
+    label.style.fontWeight = '700';
+    label.style.letterSpacing = '0.2px';
+    label.style.boxShadow = '0 2px 10px rgba(0,0,0,0.35)';
+    label.style.pointerEvents = 'none';
+    card.appendChild(label);
+  }
+
+  // No meta bar or type text below
+  grid.appendChild(card);
+}
+
+
+  link.appendChild(img);
+  card.appendChild(link);
+
+  if(isVideo){
+    const label = document.createElement('div');
+    label.textContent = 'ভিডিও';
+    label.style.position = 'absolute';
+    label.style.bottom = '8px';
+    label.style.right = '50%';
+    label.style.transform = 'translateX(50%)';
+    label.style.background = 'rgba(0,0,0,0.55)';
+    label.style.color = 'white';
+    label.style.fontSize = '16px';
+    label.style.padding = '4px 12px';
     label.style.borderRadius = '999px';
     label.style.backdropFilter = 'blur(4px)';
     label.style.fontWeight = '700';
@@ -191,32 +229,6 @@ function renderFileCard(file){
   grid.appendChild(card);
 }
 
-
-  link.appendChild(img);
-  card.appendChild(link);
-
-  // VIDEO badge
-  if(isVideo){
-    const label = document.createElement('div');
-    label.textContent = 'ভিডিও';
-    label.style.position = 'absolute';
-    label.style.top = '8px';
-    label.style.right = '8px';
-    label.style.background = 'rgba(0,0,0,0.55)';
-    label.style.color = 'white';
-    label.style.fontSize = '12px';
-    label.style.padding = '2px 6px';
-    label.style.borderRadius = '999px';
-    label.style.backdropFilter = 'blur(4px)';
-    label.style.fontWeight = '700';
-    label.style.letterSpacing = '0.2px';
-    label.style.boxShadow = '0 2px 10px rgba(0,0,0,0.35)';
-    label.style.pointerEvents = 'none';
-    card.appendChild(label);
-  }
-
-    grid.appendChild(card);
-}
 function truncate(s, n){ return s.length>n? s.slice(0, n-1)+'…' : s; }
 
 function openModal(){
@@ -237,6 +249,8 @@ async function handleAdd(){
       showToast('ভুল পাসওয়ার্ড ⚠️');
       return;
     }
+
+    // Try user link → else fallback to default
     let folderId = getFolderIdFromUrl(rawLink);
     if(!folderId){
       folderId = getFolderIdFromUrl(DEFAULT_DRIVE_URL);
@@ -245,6 +259,7 @@ async function handleAdd(){
         return;
       }
     }
+
     closeModal();
     showToast('লোড হচ্ছে…');
     const added = await listFolderFiles(folderId);
@@ -255,6 +270,7 @@ async function handleAdd(){
   }
 }
 
+// Bind after DOM ready
 window.addEventListener('DOMContentLoaded', () => {
   grid = document.getElementById('grid');
   toast = document.getElementById('toast');
@@ -276,6 +292,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   loadBoard();
 });
+
 
 /* >>> Masonry Equal-Height Cleanup (additive) <<< */
 (function(){
