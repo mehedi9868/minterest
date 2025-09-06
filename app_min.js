@@ -143,7 +143,7 @@ function renderFileCard(file){
     const label = document.createElement('div');
     label.textContent = 'ভিডিও';
     label.style.position = 'absolute';
-    label.style.bottom = '8px';
+    label.style.top = '8px';
     label.style.right = '8px';
     label.style.background = 'rgba(0,0,0,0.55)';
     label.style.color = 'white';
