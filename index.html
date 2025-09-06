@@ -150,6 +150,18 @@
 <style>
 img.sq1{aspect-ratio:1/1 !important;object-fit:cover !important;}
 </style>
+<style>
+
+/* Force first image to be square always */
+#grid .card:first-child img.sq1 {
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+}
+
+</style>
 </head>
 <body>
   <header>
