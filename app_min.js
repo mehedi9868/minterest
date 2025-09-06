@@ -173,7 +173,7 @@ function closeModal(){
 async function handleAdd(){
   try{
     const rawLink = (linkInput?.value || '').trim();
-    const pwd = (pwdInput?.value || '').trim().toLowerCase();
+    const pwd = (pwdInput?.value || '');//.trim().toLowerCase();
     if(pwd !== REQUIRED_PASSWORD && pwd !== ANOTHER_PASSWORD){
       showToast('ভুল পাসওয়ার্ড ⚠️');
       return;
