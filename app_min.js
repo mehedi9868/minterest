@@ -9,6 +9,7 @@ const DEFAULT_DRIVE_URL = "https://drive.google.com/drive/folders/12qLQqg_gjw7gG
 
 const seen = new Set();
 let grid, toast, overlay, linkInput, pwdInput;
+let firstImageSquared = false; // প্রথম ইমেজ square ট্র্যাক
 
 function showToast(msg, ms = 2600){
   if(!toast) return;
@@ -21,18 +22,16 @@ function saveBoard(){
   if(!grid) return;
   const html = grid.innerHTML;
   const ids = Array.from(seen);
-  localStorage.setItem('drivepins_grid', html);
-  localStorage.setItem('drivepins_seen', JSON.stringify(ids));
+  try{
+    localStorage.setItem('drivepins_grid', html);
+    localStorage.setItem('drivepins_seen', JSON.stringify(ids));
+  }catch(e){}
 }
-
 
 function resetBoard(){
   if(!grid) return;
-  // Clear UI
   grid.innerHTML = '';
-  // Clear seen set
-  try{ if(seen && typeof seen.clear === 'function') seen.clear(); }catch(e){}
-  // Clear saved state
+  try{ seen.clear(); }catch(e){}
   try{
     localStorage.removeItem('drivepins_grid');
     localStorage.removeItem('drivepins_seen');
@@ -42,10 +41,12 @@ function resetBoard(){
 
 function loadBoard(){
   if(!grid) return;
-  const html = localStorage.getItem('drivepins_grid');
-  const ids = localStorage.getItem('drivepins_seen');
-  if(html){ grid.innerHTML = html; }
-  if(ids){ JSON.parse(ids).forEach(id=>seen.add(id)); }
+  try{
+    const html = localStorage.getItem('drivepins_grid');
+    const ids = localStorage.getItem('drivepins_seen');
+    if(html){ grid.innerHTML = html; }
+    if(ids){ JSON.parse(ids).forEach(id=>seen.add(id)); }
+  }catch(e){}
 }
 
 // Drive folder id extractor
@@ -63,8 +64,7 @@ function getFolderIdFromUrl(url){
   }catch(e){ return null; }
 }
 
-
-
+// API fetch + ordering: keep API order, but ensure first is an image if available
 async function listFolderFiles(folderId){
   const base = 'https://www.googleapis.com/drive/v3/files';
   const q = encodeURIComponent(`'${folderId}' in parents and (mimeType contains 'image/' or mimeType contains 'video/') and trashed = false`);
@@ -88,12 +88,12 @@ async function listFolderFiles(folderId){
     pageToken = data.nextPageToken || '';
   } while(pageToken);
 
-  // Ensure first item is an image (if any image exists), preserve original order otherwise
+  // Ensure first item is an image if any image exists; preserve order for the rest
   let ordered = [];
-  const firstImageIndex = all.findIndex(f => (f.mimeType || '').startsWith('image/'));
-  if(firstImageIndex > 0){
-    ordered.push(all[firstImageIndex]);
-    ordered = ordered.concat(all.filter((_, idx) => idx !== firstImageIndex));
+  const firstImgIdx = all.findIndex(f => (f.mimeType || '').startsWith('image/'));
+  if(firstImgIdx > 0){
+    ordered.push(all[firstImgIdx]);
+    for(let i=0;i<all.length;i++){ if(i!==firstImgIdx) ordered.push(all[i]); }
   }else{
     ordered = all.slice();
   }
@@ -108,52 +108,7 @@ async function listFolderFiles(folderId){
   return added;
 }
 
-    const data = await res.json();
-    const files = (data.files || []);
-    for(const f of files){
-      if(seen.has(f.id)) continue;
-      all.push(f);
-    }
-    pageToken = data.nextPageToken || '';
-  } while(pageToken);
-
-  // Ensure first is image if available
-  let ordered = [];
-  const imgs = all.filter(f => (f.mimeType||'').startsWith('image/'));
-  if(imgs.length){
-    ordered.push(imgs[0]);
-    const rest = all.filter(f => f.id !== imgs[0].id);
-    ordered = ordered.concat(rest);
-  } else {
-    ordered = all;
-  }
-
-  for(const f of ordered){
-    renderFileCard(f);
-    seen.add(f.id);
-    added++;
-  }
-
-  if(added>0) saveBoard();
-  return added;
-}
-
-    const data = await res.json();
-    const files = (data.files || []);
-    for(const f of files){
-      if(seen.has(f.id)) continue;
-      renderFileCard(f);
-      seen.add(f.id);
-      added++;
-    }
-    pageToken = data.nextPageToken || '';
-  } while(pageToken);
-  if(added>0) saveBoard();
-  return added;
-}
-
-
-
+// Card renderer: no meta, first image square, Bengali badge for videos (bottom-right, slightly larger)
 function renderFileCard(file){
   if(!grid) return;
   const isVideo = (file.mimeType || '').startsWith('video/');
@@ -171,7 +126,7 @@ function renderFileCard(file){
   img.loading = 'lazy';
 
   // First actual image becomes square
-  if(!isVideo && typeof firstImageSquared !== 'undefined' && !firstImageSquared){
+  if(!isVideo && !firstImageSquared){
     img.classList.add('sq1');
     firstImageSquared = true;
   }
@@ -179,6 +134,7 @@ function renderFileCard(file){
   link.appendChild(img);
   card.appendChild(link);
 
+  // Bengali video badge at bottom-right
   if(isVideo){
     const label = document.createElement('div');
     label.textContent = 'ভিডিও';
@@ -187,41 +143,13 @@ function renderFileCard(file){
     label.style.bottom = '10px';
     label.style.background = 'rgba(0,0,0,0.55)';
     label.style.color = 'white';
-    label.style.fontSize = '14px';   // slightly larger
+    label.style.fontSize = '14px';
     label.style.padding = '3px 10px';
     label.style.borderRadius = '999px';
     label.style.backdropFilter = 'blur(4px)';
     label.style.fontWeight = '700';
     label.style.letterSpacing = '0.2px';
     label.style.boxShadow = '0 2px 10px rgba(0,0,0,0.35)';
-    label.style.pointerEvents = 'none';
-    card.appendChild(label);
-  }
-
-  // No meta bar or type text below
-  grid.appendChild(card);
-}
-
-
-  link.appendChild(img);
-  card.appendChild(link);
-
-  if(isVideo){
-    const label = document.createElement('div');
-    label.textContent = 'ভিডিও';
-    label.style.position = 'absolute';
-    label.style.bottom = '8px';
-    label.style.right = '50%';
-    label.style.transform = 'translateX(50%)';
-    label.style.background = 'rgba(0,0,0,0.55)';
-    label.style.color = 'white';
-    label.style.fontSize = '16px';
-    label.style.padding = '4px 12px';
-    label.style.borderRadius = '999px';
-    label.style.backdropFilter = 'blur(4px)';
-    label.style.fontWeight = '700';
-    label.style.letterSpacing = '0.3px';
-    label.style.boxShadow = '0 2px 8px rgba(0,0,0,0.35)';
     label.style.pointerEvents = 'none';
     card.appendChild(label);
   }
@@ -233,24 +161,22 @@ function truncate(s, n){ return s.length>n? s.slice(0, n-1)+'…' : s; }
 
 function openModal(){
   overlay.style.display = 'flex';
-  linkInput.focus();
+  if(linkInput) linkInput.focus();
 }
 function closeModal(){
   overlay.style.display = 'none';
-  linkInput.value = '';
-  pwdInput.value = '';
+  if(linkInput) linkInput.value = '';
+  if(pwdInput) pwdInput.value = '';
 }
 
 async function handleAdd(){
   try{
-    const rawLink = (linkInput.value || '').trim();
-    const pwd = (pwdInput.value || '').trim().toLowerCase();
+    const rawLink = (linkInput?.value || '').trim();
+    const pwd = (pwdInput?.value || '').trim().toLowerCase();
     if(pwd !== REQUIRED_PASSWORD){
       showToast('ভুল পাসওয়ার্ড ⚠️');
       return;
     }
-
-    // Try user link → else fallback to default
     let folderId = getFolderIdFromUrl(rawLink);
     if(!folderId){
       folderId = getFolderIdFromUrl(DEFAULT_DRIVE_URL);
@@ -259,7 +185,6 @@ async function handleAdd(){
         return;
       }
     }
-
     closeModal();
     showToast('লোড হচ্ছে…');
     const added = await listFolderFiles(folderId);
@@ -287,12 +212,11 @@ window.addEventListener('DOMContentLoaded', () => {
   if(btnReset) btnReset.addEventListener('click', resetBoard);
   if(btnCancel) btnCancel.addEventListener('click', closeModal);
   if(btnAdd) btnAdd.addEventListener('click', handleAdd);
-  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+  if(overlay) overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
   window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
 
   loadBoard();
 });
-
 
 /* >>> Masonry Equal-Height Cleanup (additive) <<< */
 (function(){
