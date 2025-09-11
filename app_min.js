@@ -1,3 +1,11 @@
+
+function showSuccessOverlay(){
+  const overlay = document.getElementById("success-overlay");
+  if(!overlay) return;
+  overlay.style.display = "flex";
+  setTimeout(()=>{ overlay.style.display = "none"; }, 3000);
+}
+
 'use strict';
 
 // ===== Config (set these) =====
@@ -178,6 +186,8 @@ async function handleAdd(){
       showToast('ভুল পাসওয়ার্ড ⚠️');
       return;
     }
+    // Show success overlay for 3 seconds on correct password
+    try{ showSuccessOverlay(); }catch(e){}
     let folderId = getFolderIdFromUrl(rawLink);
     if(!folderId){
       folderId = getFolderIdFromUrl(DEFAULT_DRIVE_URL);
