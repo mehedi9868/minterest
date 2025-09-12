@@ -3,7 +3,7 @@ function showSuccessOverlay(){
   const overlay = document.getElementById("success-overlay");
   if(!overlay) return;
   overlay.style.display = "flex";
-  setTimeout(()=>{ overlay.style.display = "none"; }, 3000);
+  setTimeout(()=>{ overlay.style.display = "none"; }, 6000);
 }
 
 'use strict';
