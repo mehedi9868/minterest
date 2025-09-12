@@ -45,7 +45,7 @@ function resetBoard(){
     localStorage.removeItem('drivepins_grid');
     localStorage.removeItem('drivepins_seen');
   }catch(e){}
-  showToast('প্রথম অবস্থায় ফিরিয়ে আনা হয়েছে');
+  showToast('Reset Successful');
 }
 
 function loadBoard(){
