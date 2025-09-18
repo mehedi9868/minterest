@@ -197,9 +197,9 @@ async function handleAdd(){
       }
     }
     closeModal();
-    showToast('লোড হচ্ছে…');
+    showToast(Loading…');
     const added = await listFolderFiles(folderId);
-    showToast(added===0 ? 'নতুন কোনো ফাইল পাওয়া যায়নি' : `${added} টি নতুন আইটেম যোগ হয়েছে`);
+    showToast(added===0 ? 'ফাইল পাওয়া যায়নি 💔' : `${added} টি নতুন আইটেম যোগ হয়েছে`);
   }catch(err){
     console.error(err);
     showToast('লোড করতে সমস্যা হয়েছে (folder public? API Key ঠিক আছে?)');
