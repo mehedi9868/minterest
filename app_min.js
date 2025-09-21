@@ -24,6 +24,17 @@ const observer = new IntersectionObserver(entries=>{
 },{threshold:0.1});
 
 
+function syncToggleFromView(){
+  try{
+    const mediaToggle = document.getElementById('mediaToggle');
+    if(!mediaToggle) return;
+    if(currentView==='video'){ mediaToggle.classList.add('active'); }
+    else { mediaToggle.classList.remove('active'); }
+    mediaToggle.setAttribute('aria-checked', mediaToggle.classList.contains('active') ? 'true' : 'false');
+  }catch(e){}
+}
+
+
 function saveStateExtras(){
   try{
     localStorage.setItem('drivepins_firstImageSquared', JSON.stringify(firstImageSquared));
@@ -246,12 +257,12 @@ window.addEventListener('DOMContentLoaded', () => {
       if(e.key==='ArrowLeft'){ mediaToggle.classList.remove('active'); apply(); }
       if(e.key==='ArrowRight'){ mediaToggle.classList.add('active'); apply(); }
     });
-    if(currentView==='video'){ mediaToggle.classList.add('active'); } else { mediaToggle.classList.remove('active'); }
-    // start according to saved view
+    // (initial state will be synced after loadBoard)
   }
 
   loadBoard();
   showOnly(currentView);
+  syncToggleFromView();
 
   // Save just before refresh/tab close
   window.addEventListener('beforeunload', saveBoard);
