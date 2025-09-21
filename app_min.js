@@ -23,6 +23,22 @@ const observer = new IntersectionObserver(entries=>{
 },{threshold:0.1});
 
 
+function saveStateExtras(){
+  try{
+    localStorage.setItem('drivepins_firstImageSquared', JSON.stringify(firstImageSquared));
+    localStorage.setItem('drivepins_view', currentView);
+  }catch(e){}
+}
+function loadStateExtras(){
+  try{
+    const fis = localStorage.getItem('drivepins_firstImageSquared');
+    if(fis !== null) firstImageSquared = JSON.parse(fis);
+    const v = localStorage.getItem('drivepins_view');
+    if(v) currentView = v;
+  }catch(e){}
+}
+
+
 function showToast(msg, ms = 2600){
   if(!toast) return;
   toast.textContent = msg;
@@ -42,12 +58,13 @@ function saveBoard(){
   try{
     localStorage.setItem('drivepins_grid', grid.innerHTML);
     localStorage.setItem('drivepins_seen', JSON.stringify(Array.from(seen)));
+    saveStateExtras();
   }catch(e){}
 }
 function resetBoard(){
   if(!grid) return;
   grid.innerHTML = '';
-  try{ seen.clear(); localStorage.removeItem('drivepins_grid'); localStorage.removeItem('drivepins_seen'); }catch(e){}
+  try{ seen.clear(); localStorage.removeItem('drivepins_grid'); localStorage.removeItem('drivepins_seen'); localStorage.removeItem('drivepins_firstImageSquared'); localStorage.removeItem('drivepins_view'); }catch(e){}
   showToast('Reset Successful');
 }
 function loadBoard(){
@@ -55,8 +72,12 @@ function loadBoard(){
   try{
     const html = localStorage.getItem('drivepins_grid');
     const ids = localStorage.getItem('drivepins_seen');
-    if(html){ grid.innerHTML = html; }
+    if(html){ grid.innerHTML = html; 
+      // Re-attach animation state for existing cards
+      grid.querySelectorAll('.card').forEach(card=>{ card.classList.add('visible'); });
+    }
     if(ids){ JSON.parse(ids).forEach(id=>seen.add(id)); }
+    loadStateExtras();
   }catch(e){}
 }
 
@@ -137,7 +158,7 @@ function renderFileCard(file){
   link.target = '_blank'; link.rel='noopener';
 
   const img = document.createElement('img');
-  const thumb = file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=s2048') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
+  const thumb = file.thumbnailLink ? file.thumbnailLink.replace(/=s\\d+/, '=s2048') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
   img.src = thumb;
   img.alt = isVideo ? 'ভিডিও' : 'image';
   img.loading = 'lazy';
@@ -225,9 +246,14 @@ window.addEventListener('DOMContentLoaded', () => {
       if(e.key==='ArrowLeft'){ mediaToggle.classList.remove('active'); apply(); }
       if(e.key==='ArrowRight'){ mediaToggle.classList.add('active'); apply(); }
     });
-    mediaToggle.classList.remove('active'); // start on Images
+    if(currentView==='video'){ mediaToggle.classList.add('active'); } else { mediaToggle.classList.remove('active'); }
+    // start according to saved view
   }
 
   loadBoard();
   showOnly(currentView);
+
+  // Save just before refresh/tab close
+  window.addEventListener('beforeunload', saveBoard);
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveBoard(); });
 });
