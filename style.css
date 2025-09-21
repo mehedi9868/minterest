@@ -191,3 +191,26 @@ footer{ text-align:center; color:var(--muted); padding:30px 16px; border-top:1px
   .totals-badge{ font-size:12px; padding:6px 10px }
 }
 /* === End Added === */
+
+
+/* === Patched by ChatGPT (2025-09-21): control bar + fab z-index === */
+.control-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:10px 14px;
+  border-bottom:1px solid var(--border, rgba(255,255,255,.12));
+  background:var(--surface, #0b1119);
+}
+.control-left{ display:flex; align-items:center; gap:10px; flex:1 1 auto; min-width:0 }
+.control-right{ display:flex; align-items:center; gap:10px; flex:0 0 auto }
+.control-right > *{ margin-left:0 }
+.totals-badge{
+  padding:8px 12px; border-radius:999px; white-space:nowrap;
+  background:#0e141c; border:1px solid var(--border, rgba(255,255,255,.12));
+  color:var(--text, #e6eef8); font:700 13px/1 Inter, system-ui, Segoe UI, Roboto, Arial;
+}
+@media (max-width:480px){
+  .control-bar{ padding:8px 10px }
+  .totals-badge{ font-size:12px; padding:6px 10px }
+}
+.fab{ z-index: 1000; }
+/* === End Patch === */

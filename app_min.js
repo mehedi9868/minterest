@@ -709,3 +709,78 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 })();
 /* === End Added === */
+
+
+/* === Patched by ChatGPT (2025-09-21): SINGLE counter on left, toggle on right; dedupe; stable layout === */
+(function(){
+  const onReady = (fn)=>{
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
+    else fn();
+  };
+
+  onReady(()=>{
+    try{
+      if (window.__dp_controlBarSetup) return; // run once
+      window.__dp_controlBarSetup = true;
+
+      const header = document.querySelector('header');
+      const galleryRoot = document.querySelector('.grid, .cards, .gallery, #grid, .masonry') || document.body;
+      const existingBar = document.querySelector('.control-bar');
+
+      let bar = existingBar;
+      if(!bar){
+        bar = document.createElement('div');
+        bar.className = 'control-bar';
+        if(header && header.parentNode){
+          (header.nextElementSibling)
+            ? header.parentNode.insertBefore(bar, header.nextElementSibling)
+            : header.parentNode.appendChild(bar);
+        }else{
+          document.body.insertBefore(bar, document.body.firstChild);
+        }
+        const left = document.createElement('div'); left.className = 'control-left';
+        const right = document.createElement('div'); right.className = 'control-right';
+        bar.appendChild(left); bar.appendChild(right);
+      }
+
+      const left = bar.querySelector('.control-left') || bar;
+      const right = bar.querySelector('.control-right') || bar;
+
+      // Move toggle to right ONCE
+      const toggleCandidate = document.querySelector('.toggle-bar');
+      if(toggleCandidate && toggleCandidate.parentElement !== right){
+        right.appendChild(toggleCandidate);
+        toggleCandidate.dataset.pinned = 'true';
+      }
+
+      // SINGLE totals on left; kill duplicates
+      let totals = left.querySelector('.totals-badge');
+      document.querySelectorAll('.totals-badge').forEach(el=>{ if(el !== totals) el.remove(); });
+      if(!totals){
+        totals = document.createElement('div');
+        totals.className = 'totals-badge';
+        totals.setAttribute('role','status');
+        left.appendChild(totals);
+      }
+      right.querySelectorAll('.totals-badge').forEach(el=> el.remove());
+
+      const updateTotals = ()=>{
+        let imageCount = 0, videoCount = 0;
+        const cards = (document.querySelector('.grid, .cards, .gallery, #grid, .masonry') || document.body)
+                      .querySelectorAll('.card, .item, .tile, .gallery-item');
+        cards.forEach(c=>{
+          const isVid = (c.dataset && c.dataset.type && c.dataset.type.toLowerCase()==='video') || c.querySelector('video');
+          if(isVid) videoCount++; else imageCount++;
+        });
+        totals.textContent = `ছবি: ${imageCount} · ভিডিও: ${videoCount}`;
+        totals.setAttribute('aria-label', `মোট ছবি ${imageCount} এবং ভিডিও ${videoCount}`);
+      };
+
+      setTimeout(updateTotals, 50);
+      const obs = new MutationObserver(updateTotals);
+      obs.observe(document.querySelector('.grid, .cards, .gallery, #grid, .masonry') || document.body, {childList:true, subtree:true});
+      window.addEventListener('load', updateTotals);
+    }catch(err){}
+  });
+})();
+/* === End Patch === */
