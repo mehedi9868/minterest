@@ -11,6 +11,7 @@ let grid, toast, overlay, pwdInput;
 let firstImageSquared = false;
 let currentView = 'image'; // default
 const seen = new Set();
+let renderCount = 0; // counts rendered media to assign size pattern
 
 // Observer for scroll animation
 const observer = new IntersectionObserver(entries=>{
@@ -162,13 +163,11 @@ function renderFileCard(file){
   img.src = thumb;
   img.alt = isVideo ? 'ভিডিও' : 'image';
   img.loading = 'lazy';
+  // Assign one of five fixed size classes cyclically
+  const slot = (renderCount % 5) + 1; // 1..5
+  img.classList.add(`size-${slot}`);
 
-  if(!isVideo && !firstImageSquared){
-    img.classList.add('sq1');
-    firstImageSquared = true;
-  }
-
-  link.appendChild(img);
+link.appendChild(img);
   card.appendChild(link);
 
   if(isVideo){
@@ -179,6 +178,7 @@ function renderFileCard(file){
   }
 
   grid.appendChild(card);
+  renderCount++;
   observer.observe(card);   // scroll animation
 }
 

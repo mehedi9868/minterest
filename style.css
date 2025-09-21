@@ -64,7 +64,7 @@ header{
 .card:hover{ transform:translateY(-2px); background:var(--card-hover) }
 
 .card img, .card video{ width:100%; display:block }
-img.sq1{ aspect-ratio:1/1; object-fit:cover }
+
 
 /* Buttons */
 .btn{ border:1px solid var(--border); background:#0e141c; color:var(--text); padding:10px 14px; border-radius:10px; font:600 13px/1 Inter; cursor:pointer }
@@ -113,3 +113,13 @@ footer{ text-align:center; color:var(--muted); padding:30px 16px; border-top:1px
 .loader{ border:8px solid #f3f3f3; border-top:8px solid #3498db; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite }
 
 @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+
+/* ---- Fixed size pattern (repeats every 5 images) ---- */
+.card img.size-1{ aspect-ratio: 1 / 1; object-fit: cover; }
+.card img.size-2{ aspect-ratio: 3 / 4; object-fit: cover; }   /* portrait */
+.card img.size-3{ aspect-ratio: 4 / 5; object-fit: cover; }   /* portrait narrow */
+.card img.size-4{ aspect-ratio: 4 / 3; object-fit: cover; }   /* landscape */
+.card img.size-5{ aspect-ratio: 16 / 9; object-fit: cover; }  /* wide */
+
+/* Ensure videos still fit gracefully */
+.card video{ aspect-ratio: 16 / 9; object-fit: cover; }
