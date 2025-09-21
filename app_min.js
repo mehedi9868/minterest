@@ -636,3 +636,76 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 })();
 /* === End Updated by ChatGPT === */
+
+/* === Added by ChatGPT (2025-09-21): Single control bar with LEFT counter and RIGHT toggle === */
+(function(){
+  const onReady = (fn)=>{
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
+    else fn();
+  };
+
+  onReady(()=>{
+    const header = document.querySelector('header') || document.body;
+    const galleryRoot = document.querySelector('.grid, .cards, .gallery, #grid, .masonry') || document.body;
+
+    // Ensure single control bar under header
+    let bar = document.querySelector('.control-bar');
+    if(!bar){
+      bar = document.createElement('div');
+      bar.className = 'control-bar';
+      if(header.nextElementSibling){
+        header.parentNode.insertBefore(bar, header.nextElementSibling);
+      }else{
+        header.parentNode.appendChild(bar);
+      }
+      // build left/right containers
+      const left = document.createElement('div');
+      left.className = 'control-left';
+      const right = document.createElement('div');
+      right.className = 'control-right';
+      bar.appendChild(left);
+      bar.appendChild(right);
+    }
+    const left = bar.querySelector('.control-left') || bar;
+    const right = bar.querySelector('.control-right') || bar;
+
+    // Find any existing toggle switch in DOM and move to right ONCE
+    const toggleCandidate = document.querySelector('.toggle-bar, .toggle, .switch, .view-toggle, .filter-toggle');
+    if(toggleCandidate && !right.contains(toggleCandidate)){
+      right.appendChild(toggleCandidate);
+    }
+
+    // Create single totals badge on the LEFT
+    let totals = left.querySelector('.totals-badge');
+    // Remove duplicates anywhere else
+    document.querySelectorAll('.totals-badge').forEach((el)=>{
+      if(el !== totals) el.remove();
+    });
+    if(!totals){
+      totals = document.createElement('div');
+      totals.className = 'totals-badge';
+      totals.setAttribute('role','status');
+      left.appendChild(totals);
+    }
+
+    // Count updater (images + videos). We assume per-item badges code already exists elsewhere.
+    const updateTotals = ()=>{
+      const cards = galleryRoot.querySelectorAll('.card, .item, .tile, .gallery-item');
+      let imageCount = 0, videoCount = 0;
+      cards.forEach(c=>{
+        const isVid = c.dataset?.type?.toLowerCase() === 'video' || c.querySelector('video');
+        if(isVid) videoCount++; else imageCount++;
+      });
+      totals.textContent = `ছবি: ${imageCount} · ভিডিও: ${videoCount}`;
+      totals.setAttribute('aria-label', `মোট ছবি ${imageCount} এবং ভিডিও ${videoCount}`);
+    };
+
+    // First update
+    setTimeout(updateTotals, 30);
+    // Observe changes to keep in sync
+    const obs = new MutationObserver(updateTotals);
+    obs.observe(galleryRoot, {childList:true, subtree:true});
+    window.addEventListener('load', updateTotals);
+  });
+})();
+/* === End Added === */

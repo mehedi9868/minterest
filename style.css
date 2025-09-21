@@ -160,3 +160,34 @@ footer{ text-align:center; color:var(--muted); padding:30px 16px; border-top:1px
   z-index:2;
 }
 /* === End Updated === */
+
+/* === Added by ChatGPT (2025-09-21): control bar layout and clean totals badge === */
+.control-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border, rgba(255,255,255,.12));
+  background:var(--surface, #0b1119);
+}
+.control-left, .control-right{
+  display:flex; align-items:center; gap:10px;
+}
+.totals-badge{
+  padding:8px 12px;
+  border-radius:999px;
+  background:#0e141c;
+  border:1px solid var(--border, rgba(255,255,255,.12));
+  color:var(--text, #e6eef8);
+  font:700 13px/1 Inter, system-ui, Segoe UI, Roboto, Arial;
+  white-space:nowrap;
+  opacity:.95;
+}
+/* make sure toggle block doesn't stretch */
+.control-right > *{ margin-left:auto }
+@media (max-width:480px){
+  .control-bar{ padding:8px 10px }
+  .totals-badge{ font-size:12px; padding:6px 10px }
+}
+/* === End Added === */
