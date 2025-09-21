@@ -420,7 +420,7 @@ window.addEventListener('DOMContentLoaded', () => {
   window.__updateImageVideoTotals = scheduleRecalc;
 })();
 
-/* === Added by ChatGPT: auto-number badges for images/videos and totals badge === */
+
 (function(){
   // wait for DOM
   const onReady = (fn)=>{
@@ -513,3 +513,126 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 })();
 /* === End added === */
+
+/* === Updated by ChatGPT: only per-item badges, no totals === */
+(function(){
+  const onReady = (fn)=>{
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
+    else fn();
+  };
+
+  onReady(()=>{
+    const grid = document.querySelector('.grid, .cards, .gallery, #grid, .masonry') || document.body;
+
+    let imageCount = 0, videoCount = 0;
+
+    const typeOfCard = (card)=>{
+      const t = (card.dataset && card.dataset.type) ? card.dataset.type.toLowerCase() : '';
+      if(t === 'video') return 'video';
+      if(t === 'image') return 'image';
+      if(card.querySelector('video')) return 'video';
+      if(card.querySelector('img')) return 'image';
+      const a = card.querySelector('a');
+      if(a && a.href){
+        const url = a.href.split('?')[0].toLowerCase();
+        if(/\.(mp4|webm|mov|m4v|ogg)$/.test(url)) return 'video';
+        if(/\.(jpg|jpeg|png|gif|webp|avif|bmp|svg)$/.test(url)) return 'image';
+      }
+      return 'image';
+    };
+
+    const addBadgeIfMissing = (card, n, label)=>{
+      if(card.querySelector('.count-badge')) return;
+      if(getComputedStyle(card).position === 'static'){
+        card.style.position = 'relative';
+      }
+      const b = document.createElement('div');
+      b.className = 'count-badge';
+      b.textContent = String(n);
+      b.setAttribute('aria-label', (label==='video' ? 'ভিডিও নম্বর ' : 'ছবি নম্বর ') + n);
+      card.appendChild(b);
+    };
+
+    const recountAll = ()=>{
+      imageCount = 0; videoCount = 0;
+      const cards = grid.querySelectorAll('.card, .item, .tile, .gallery-item');
+      cards.forEach(card=>{
+        const kind = typeOfCard(card);
+        if(kind === 'video'){
+          videoCount++;
+          addBadgeIfMissing(card, videoCount, 'video');
+        } else {
+          imageCount++;
+          addBadgeIfMissing(card, imageCount, 'image');
+        }
+      });
+    };
+
+    setTimeout(recountAll, 50);
+    const obs = new MutationObserver(recountAll);
+    obs.observe(grid, {childList:true, subtree:true});
+    window.addEventListener('load', recountAll);
+  });
+})();
+
+/* === Updated by ChatGPT (2025-09-21): only per-item badges, no totals === */
+(function(){
+  const onReady = (fn)=>{
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
+    else fn();
+  };
+
+  onReady(()=>{
+    const grid = document.querySelector('.grid, .cards, .gallery, #grid, .masonry') || document.body;
+
+    let imageCount = 0, videoCount = 0;
+
+    const typeOfCard = (card)=>{
+      const t = (card.dataset && card.dataset.type) ? card.dataset.type.toLowerCase() : '';
+      if(t === 'video' || t === 'vid') return 'video';
+      if(t === 'image' || t === 'img' || t === 'photo') return 'image';
+      if(card.querySelector('video')) return 'video';
+      if(card.querySelector('img')) return 'image';
+      const a = card.querySelector('a');
+      if(a && a.href){
+        const url = a.href.split('?')[0].toLowerCase();
+        if(/\.(mp4|webm|mov|m4v|ogg)$/.test(url)) return 'video';
+        if(/\.(jpg|jpeg|png|gif|webp|avif|bmp|svg)$/.test(url)) return 'image';
+      }
+      return 'image';
+    };
+
+    const addBadgeIfMissing = (card, n, label)=>{
+      if(card.querySelector('.count-badge')) return;
+      if(getComputedStyle(card).position === 'static'){
+        card.style.position = 'relative';
+      }
+      const b = document.createElement('div');
+      b.className = 'count-badge';
+      b.textContent = String(n);
+      b.setAttribute('aria-label', (label==='video' ? 'ভিডিও নম্বর ' : 'ছবি নম্বর ') + n);
+      card.appendChild(b);
+    };
+
+    const recountAll = ()=>{
+      imageCount = 0; videoCount = 0;
+      const cards = grid.querySelectorAll('.card, .item, .tile, .gallery-item');
+      cards.forEach(card=>{
+        const kind = typeOfCard(card);
+        if(kind === 'video'){
+          videoCount++;
+          addBadgeIfMissing(card, videoCount, 'video');
+        } else {
+          imageCount++;
+          addBadgeIfMissing(card, imageCount, 'image');
+        }
+      });
+    };
+
+    setTimeout(recountAll, 50);
+    const obs = new MutationObserver(recountAll);
+    obs.observe(grid, {childList:true, subtree:true});
+    window.addEventListener('load', recountAll);
+  });
+})();
+/* === End Updated by ChatGPT === */
