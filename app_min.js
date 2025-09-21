@@ -1,3 +1,23 @@
+
+// === Added for image/video count badges ===
+let imageCount = 0;
+let videoCount = 0;
+let totalsEl = null;
+
+function updateTotalsBadge(){
+  try{
+    const bar = document.querySelector('.toggle-bar');
+    if(!bar) return;
+    if(!totalsEl){
+      totalsEl = document.createElement('div');
+      totalsEl.id = 'totals';
+      totalsEl.className = 'totals-badge';
+      bar.appendChild(totalsEl);
+    }
+    totalsEl.textContent = `ছবি: ${imageCount} · ভিডিও: ${videoCount}`;
+    totalsEl.setAttribute('aria-label', `মোট ছবি ${imageCount} এবং ভিডিও ${videoCount}`);
+  }catch(e){}
+}
 'use strict';
 
 /* ========= Config ========= */
@@ -180,6 +200,21 @@ function renderFileCard(file){
 
 link.appendChild(img);
   card.appendChild(link);
+  // === Serial number badge ===
+  const countBadge = document.createElement('div');
+  countBadge.className = 'count-badge';
+  if(isVideo){
+    videoCount += 1;
+    countBadge.textContent = String(videoCount);
+    countBadge.setAttribute('aria-label', `ভিডিও নম্বর ${videoCount}`);
+  }else{
+    imageCount += 1;
+    countBadge.textContent = String(imageCount);
+    countBadge.setAttribute('aria-label', `ছবি নম্বর ${imageCount}`);
+  }
+  card.appendChild(countBadge);
+  updateTotalsBadge();
+
 
   if(isVideo){
     const label = document.createElement('div');
@@ -268,3 +303,213 @@ window.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('beforeunload', saveBoard);
   document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveBoard(); });
 });
+
+
+/* === Image/Video Serial & Totals (added by ChatGPT) === */
+(function(){
+  let imageCount = 0;
+  let videoCount = 0;
+  let totalsEl = null;
+  let recalcScheduled = false;
+
+  function getGridNodes(){
+    // Try common containers; fallback to all cards in document
+    const grids = Array.from(document.querySelectorAll('.grid, #grid, .cards, .cards-grid'));
+    if(grids.length) return grids;
+    return [document.body];
+  }
+
+  function ensureTotalsNode(){
+    if(totalsEl && totalsEl.isConnected) return totalsEl;
+    const bar = document.querySelector('.toggle-bar');
+    totalsEl = document.createElement('div');
+    totalsEl.id = 'totals';
+    totalsEl.className = 'totals-badge';
+    totalsEl.textContent = 'লোড হচ্ছে…';
+    if(bar){
+      bar.appendChild(totalsEl);
+    }else{
+      totalsEl.classList.add('fallback-fixed');
+      document.body.appendChild(totalsEl);
+    }
+    return totalsEl;
+  }
+
+  function isVideoCard(card){
+    // Priority 1: data-type hint
+    const t = (card.dataset && card.dataset.type) ? String(card.dataset.type).toLowerCase() : '';
+    if(t === 'video') return true;
+    if(t === 'image' || t === 'img' || t === 'photo') return false;
+    // Priority 2: tag detection within the card
+    if(card.querySelector('video, source[type^="video/"]')) return true;
+    // Priority 3: badge text heuristic (for Bengali "ভিডিও" etc.)
+    const b = card.querySelector('.badge, .tag, .label');
+    if(b){
+      const txt = b.textContent.trim().toLowerCase();
+      if(txt.includes('video') || txt.includes('ভিডিও')) return true;
+    }
+    return false;
+  }
+
+  function recalc(){
+    recalcScheduled = false;
+    imageCount = 0;
+    videoCount = 0;
+
+    const cards = Array.from(document.querySelectorAll('.card'));
+    let imgIndex = 0, vidIndex = 0;
+    for(const c of cards){
+      // position context
+      c.style.position = c.style.position || 'relative';
+      const video = isVideoCard(c);
+      const badge = c.querySelector('.count-badge') || (()=>{
+        const el = document.createElement('div');
+        el.className = 'count-badge';
+        c.appendChild(el);
+        return el;
+      })();
+      if(video){
+        vidIndex += 1;
+        badge.textContent = String(vidIndex);
+        badge.setAttribute('aria-label', `ভিডিও নম্বর ${vidIndex}`);
+        videoCount += 1;
+      }else{
+        imgIndex += 1;
+        badge.textContent = String(imgIndex);
+        badge.setAttribute('aria-label', `ছবি নম্বর ${imgIndex}`);
+        imageCount += 1;
+      }
+    }
+    const total = ensureTotalsNode();
+    total.textContent = `ছবি: ${imageCount} · ভিডিও: ${videoCount}`;
+    total.setAttribute('aria-label', `মোট ছবি ${imageCount} এবং ভিডিও ${videoCount}`);
+  }
+
+  function scheduleRecalc(){
+    if(recalcScheduled) return;
+    recalcScheduled = true;
+    requestAnimationFrame(()=>{
+      setTimeout(recalc, 0);
+    });
+  }
+
+  // Observe grid(s) for dynamic changes
+  function setupObservers(){
+    const grids = getGridNodes();
+    const cfg = {childList:true, subtree:true};
+    for(const g of grids){
+      new MutationObserver(scheduleRecalc).observe(g, cfg);
+    }
+    // Also observe body (fallback for appends elsewhere)
+    new MutationObserver(scheduleRecalc).observe(document.body, {childList:true, subtree:true});
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ()=>{
+      ensureTotalsNode();
+      setupObservers();
+      scheduleRecalc();
+    });
+  }else{
+    ensureTotalsNode();
+    setupObservers();
+    scheduleRecalc();
+  }
+
+  // Public helper in case app code wants to force-update
+  window.__updateImageVideoTotals = scheduleRecalc;
+})();
+
+/* === Added by ChatGPT: auto-number badges for images/videos and totals badge === */
+(function(){
+  // wait for DOM
+  const onReady = (fn)=>{
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
+    else fn();
+  };
+
+  onReady(()=>{
+    // locate grid (common class names fallback)
+    const grid = document.querySelector('.grid, .cards, .gallery, #grid, .masonry') || document.body;
+    const toggleBar = document.querySelector('.toggle-bar') || document.querySelector('.toolbar') || document.querySelector('header');
+
+    let imageCount = 0, videoCount = 0;
+    let totalsEl = null;
+
+    const ensureTotals = ()=>{
+      if(!toggleBar) return null;
+      if(!totalsEl){
+        totalsEl = document.createElement('div');
+        totalsEl.id = 'totals';
+        totalsEl.className = 'totals-badge';
+        toggleBar.appendChild(totalsEl);
+      }
+      return totalsEl;
+    };
+
+    const typeOfCard = (card)=>{
+      // priority: data-type attr
+      const t = (card.dataset && card.dataset.type) ? card.dataset.type.toLowerCase() : '';
+      if(t === 'video' || t === 'vid') return 'video';
+      if(t === 'image' || t === 'img' || t === 'photo' ) return 'image';
+      // heuristic by content
+      if(card.querySelector('video')) return 'video';
+      if(card.querySelector('img')) return 'image';
+      // fallback by extension if anchor exists
+      const a = card.querySelector('a');
+      if(a && a.href){
+        const url = a.href.split('?')[0].toLowerCase();
+        if(/\.(mp4|webm|mov|m4v|ogg)$/.test(url)) return 'video';
+        if(/\.(jpg|jpeg|png|gif|webp|avif|bmp|svg)$/.test(url)) return 'image';
+      }
+      return 'image';
+    };
+
+    const addBadgeIfMissing = (card, n, label)=>{
+      if(card.querySelector('.count-badge')) return;
+      // ensure card is positioned container
+      const style = getComputedStyle(card);
+      if(style.position === 'static'){
+        card.style.position = 'relative';
+      }
+      const b = document.createElement('div');
+      b.className = 'count-badge';
+      b.textContent = String(n);
+      b.setAttribute('aria-label', (label === 'video' ? 'ভিডিও নম্বর ' : 'ছবি নম্বর ') + n);
+      card.appendChild(b);
+    };
+
+    const recountAll = ()=>{
+      imageCount = 0; videoCount = 0;
+      const cards = grid.querySelectorAll('.card, .item, .tile, .gallery-item');
+      cards.forEach(card=>{
+        const kind = typeOfCard(card);
+        if(kind === 'video'){
+          videoCount += 1;
+          addBadgeIfMissing(card, videoCount, 'video');
+        }else{
+          imageCount += 1;
+          addBadgeIfMissing(card, imageCount, 'image');
+        }
+      });
+      const t = ensureTotals();
+      if(t){
+        t.textContent = `ছবি: ${imageCount} · ভিডিও: ${videoCount}`;
+        t.setAttribute('aria-label', `মোট ছবি ${imageCount} এবং ভিডিও ${videoCount}`);
+      }
+    };
+
+    // Initial pass after small delay to allow other scripts to render cards
+    setTimeout(recountAll, 50);
+
+    // Observe future changes
+    const obs = new MutationObserver(()=>{
+      recountAll();
+    });
+    obs.observe(grid, {childList:true, subtree:true});
+
+    // Also update after window load (media elements might be added late)
+    window.addEventListener('load', recountAll);
+  });
+})();
+/* === End added === */
