@@ -111,10 +111,10 @@ footer{ text-align:center; color:var(--muted); padding:30px 16px; border-top:1px
 
 /* ---- Fixed size pattern (repeats every 5 images) ---- */
 .card img.size-1{ aspect-ratio: 1 / 1; object-fit: cover; }
-.card img.size-2{ aspect-ratio: 3 / 4; object-fit: cover; }   /* portrait */
-.card img.size-3{ aspect-ratio: 4 / 5; object-fit: cover; }   /* portrait narrow */
-.card img.size-4{ aspect-ratio: 4 / 3; object-fit: cover; }   /* landscape */
-.card img.size-5{ aspect-ratio: 16 / 9; object-fit: cover; }  /* wide */
+.card img.size-2{ aspect-ratio: 2 / 3; object-fit: cover; }   /* portrait */
+.card img.size-3{ aspect-ratio: 3 / 4; object-fit: cover; }   /* portrait narrow */
+.card img.size-4{ aspect-ratio: 4 / 5; object-fit: cover; }   /* landscape */
+.card img.size-5{ aspect-ratio: 5 / 7; object-fit: cover; }  /* wide */
 
 /* Ensure videos still fit gracefully */
 .card video{ aspect-ratio: 16 / 9; object-fit: cover; }
