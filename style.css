@@ -1,0 +1,120 @@
+:root{
+  --bg:#0b0d10; --panel:#0f1318; --text:#e7ecf3; --muted:#9aa4b2; --border:#1b2431;
+  --brand:#7c5cff; --brand2:#26e4a7; --card:#0f141b; --card-hover:#121a23;
+}
+
+*{box-sizing:border-box}
+
+body{margin:0; color:var(--text); font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background: var(--bg);
+}
+
+.shell{max-width:1200px; margin:0 auto; padding:0 18px}
+.spacer{flex:1}
+
+header{
+  position:sticky; top:0; z-index:60; backdrop-filter:blur(10px);
+  background:linear-gradient(180deg, rgba(11,13,16,.9), rgba(11,13,16,.7));
+  border-bottom:1px solid var(--border);
+}
+
+.bar{display:flex; align-items:center; gap:14px; padding:14px 0}
+
+.logo{display:flex; align-items:center; gap:10px; font-weight:800}
+.logo-badge{
+  display:grid; place-items:center; width:40px; height:40px; border-radius:12px;
+  background:linear-gradient(135deg, var(--brand), var(--brand2)); color:#091017
+}
+.brand{font-size:18px}
+
+/* Toggle bar */
+.toggle-bar{
+  display:flex; justify-content:center; padding:12px; background:var(--panel);
+  border-bottom:1px solid var(--border); position:sticky; top:58px; z-index:55;
+}
+.toggle{
+  position:relative; display:flex; width:240px; background:#0e141c;
+  border:1px solid var(--border); border-radius:30px; overflow:hidden;
+  cursor:pointer; font:600 14px/1 Inter; user-select:none;
+}
+.toggle .option{ flex:1; text-align:center; z-index:1; padding:10px 0; color:var(--muted); transition:color .25s ease }
+.toggle .slider{
+  position:absolute; inset:0 auto 0 0; width:50%;
+  background:linear-gradient(135deg, var(--brand), var(--brand2)); border-radius:30px; transition:transform .25s ease; z-index:0
+}
+.toggle.active .slider{ transform:translateX(100%) }
+.toggle:not(.active) .option.image{ color:#091017 }
+.toggle.active .option.video{ color:#091017 }
+
+/* Masonry Grid */
+#grid{ column-count:2; column-gap:16px; padding:18px 0 80px } /* 2 columns by default on mobile */
+@media (min-width:860px){ #grid{ column-count:3 } }
+@media (min-width:1140px){ #grid{ column-count:4 } }
+
+.card{
+  break-inside:avoid; margin:0 0 16px; position:relative; border-radius:16px; overflow:hidden;
+  background:var(--card); border:1px solid var(--border); transition:transform .18s, background .18s;
+  opacity:0; transform:translateY(30px); transition:opacity .6s ease, transform .6s ease;
+}
+.card.visible{ opacity:1; transform:translateY(0) }
+.card:hover{ transform:translateY(-2px); background:var(--card-hover) }
+
+.card img, .card video{ width:100%; display:block }
+
+
+/* Buttons */
+.btn{ border:1px solid var(--border); background:#0e141c; color:var(--text); padding:10px 14px; border-radius:10px; font:600 13px/1 Inter; cursor:pointer }
+.btn.primary{ background:linear-gradient(135deg, rgba(124,92,255,.25), rgba(38,228,167,.24)); border-color:transparent }
+
+/* FAB */
+.fab{
+  position:fixed; right:22px; bottom:22px; width:64px; height:64px; border:0; border-radius:50%; font:800 28px/1 Inter; color:#081018; cursor:pointer;
+  box-shadow:0 12px 40px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.06);
+  background:linear-gradient(135deg, var(--brand), var(--brand2));
+}
+
+/* Modal */
+#overlay{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center; padding:24px; z-index:9999;
+  background:rgba(2,4,8,.72); backdrop-filter:blur(6px)
+}
+.modal{ width:min(560px, 92vw); background:#0e141c; border:1px solid var(--border); border-radius:18px; overflow:hidden }
+.modal .body{ padding:16px 18px; display:flex; flex-direction:column; gap:12px }
+.row{ display:flex; gap:10px; align-items:center }
+.label{ width:110px; color:var(--muted); font-size:13px }
+.input{ flex:1; display:flex; align-items:center; gap:10px; background:#0c1219; border:1px solid var(--border); border-radius:10px; padding:10px 12px }
+.input input{ flex:1; background:transparent; border:0; outline:0; color:var(--text); font:500 14px/1 Inter }
+.foot{ display:flex; justify-content:flex-end; gap:10px; padding:16px 18px; border-top:1px solid var(--border) }
+
+/* Toast */
+#toast{
+  position:fixed; left:50%; bottom:100px; transform:translateX(-50%); background:rgba(14,18,23,.92); color:#eaf2ff; border:1px solid rgba(255,255,255,.08);
+  padding:10px 14px; border-radius:999px; display:none; z-index:70; font:700 13px/1 Inter
+}
+
+/* Footer */
+footer{ text-align:center; color:var(--muted); padding:30px 16px; border-top:1px solid var(--border) }
+
+/* Bengali video badge */
+.badge{
+  position:absolute; right:10px; bottom:10px; background:rgba(0,0,0,.55); color:#fff; font-size:14px; padding:3px 10px; border-radius:999px; font-weight:700; letter-spacing:.2px
+}
+
+/* Success overlay */
+.success-overlay{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000;
+  align-items:center; justify-content:center; flex-direction:column;
+}
+.success-image{ max-width:220px; border-radius:12px; margin-bottom:20px; }
+.loader{ border:8px solid #f3f3f3; border-top:8px solid #3498db; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite }
+
+@keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+
+/* ---- Fixed size pattern (repeats every 5 images) ---- */
+.card img.size-1{ aspect-ratio: 3 / 4; object-fit: cover; }
+.card img.size-2{ aspect-ratio: 2 / 3; object-fit: cover; }   /* portrait */
+.card img.size-3{ aspect-ratio: 2 / 3; object-fit: cover; }   /* portrait narrow */
+.card img.size-4{ aspect-ratio: 2 / 3; object-fit: cover; }   /* landscape */
+.card img.size-5{ aspect-ratio: 2 / 3; object-fit: cover; }  /* wide */
+
+/* Ensure videos still fit gracefully */
+.card video{ aspect-ratio: 16 / 9; object-fit: cover; }

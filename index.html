@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minterest — Drive Pins</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <div class="bar">
+        <div class="logo" aria-label="Minterest">
+          <div class="logo-badge">Mi</div>
+          <div class="brand">Minterest</div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" id="btnReset" type="button" title="প্রথম অবস্থায় ফেরত">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toggle Switch -->
+  <div class="toggle-bar">
+    <div class="toggle" id="mediaToggle" role="switch" aria-checked="false" tabindex="0" aria-label="Switch between Images and Videos">
+      <span class="option image">Images</span>
+      <span class="option video">Videos</span>
+      <div class="slider"></div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <section id="grid" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    <div class="tiny">© <span id="yr"></span> Mehedi • ❤</div>
+  </footer>
+
+  <button id="fab" aria-label="Add" class="fab">+</button>
+
+  <!-- Modal -->
+  <div id="overlay" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <div class="body">
+        <div class="row">
+          <div class="label">Password</div>
+          <div class="input"><input id="password" type="password" placeholder="Enter password" autofocus></div>
+        </div>
+      </div>
+      <div class="foot">
+        <button class="btn" id="btnCancel" type="button">Cancel</button>
+        <button class="btn primary" id="btnAdd" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Success Overlay -->
+  <div id="success-overlay" class="success-overlay">
+    <img src="success.jpg" alt="Success" class="success-image"/>
+    <div class="loader"></div>
+  </div>
+
+  <script src="app_min.js"></script>
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
