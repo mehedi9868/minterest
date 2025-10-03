@@ -33,7 +33,7 @@ header{
 }
 .toggle{
   position:relative; display:flex; width:240px; background:#0e141c;
-  border:1px solid var(--border); border-radius:30px; overflow:hidden;
+  border:1px solid var(--border); border-radius:12px; overflow:hidden;
   cursor:pointer; font:600 14px/1 Inter; user-select:none;
 }
 .toggle .option{ flex:1; text-align:center; z-index:1; padding:10px 0; color:var(--muted); transition:color .25s ease }
@@ -51,8 +51,8 @@ header{
 @media (min-width:1140px){ #grid{ column-count:4 } }
 
 .card{
-  break-inside:avoid; margin:4px; position:relative; border-radius:8px; overflow:hidden;
-  background:var(--card); border:1px solid var(--border); transition:transform .18s, background .18s;
+  break-inside:avoid; margin:0 0 4px; position:relative; border-radius:8px; overflow:hidden;
+  background:var(--card); border:1px solid white; transition:transform .18s, background .18s;
   opacity:0; transform:translateY(30px); transition:opacity .6s ease, transform .6s ease;
 }
 .card.visible{ opacity:1; transform:translateY(0) }
