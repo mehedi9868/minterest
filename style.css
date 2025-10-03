@@ -51,7 +51,7 @@ header{
 @media (min-width:1140px){ #grid{ column-count:4 } }
 
 .card{
-  break-inside:avoid; margin:0 0 16px; position:relative; border-radius:16px; overflow:hidden;
+  break-inside:avoid; margin:0 0 4px; position:relative; border-radius:4px; overflow:hidden;
   background:var(--card); border:1px solid var(--border); transition:transform .18s, background .18s;
   opacity:0; transform:translateY(30px); transition:opacity .6s ease, transform .6s ease;
 }
